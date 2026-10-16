@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Carburant moins cher</title>
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#16a34a"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>Carburant moins cher</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--tx:#14171a;--mu:#6b7280;--ac:#16a34a;--bd:#e5e7eb}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1214;--card:#1a1e22;--tx:#f1f3f5;--mu:#9aa3ad;--ac:#4ade80;--bd:#2a3037}}
@@ -72,6 +72,7 @@ $("go").onclick=()=>{
     ()=>{$("s").textContent="Localisation refusée."},
     {enableHighAccuracy:true,timeout:10000});
 };
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
