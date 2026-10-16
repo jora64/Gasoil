@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#f97316"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<title>Carburant le moins cher</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#14171a;--mu:#6b7280;--ac:#16a34a;--bd:#e5e7eb;--wa:#d97706;--er:#dc2626}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1214;--card:#1a1e22;--tx:#f1f3f5;--mu:#9aa3ad;--ac:#4ade80;--bd:#2a3037;--wa:#fbbf24;--er:#f87171}}
+*{box-sizing:border-box}
+body{margin:0 auto;background:var(--bg);color:var(--tx);font:16px system-ui,sans-serif;padding:16px;max-width:560px}
+h1{font-size:22px;margin:4px 0 12px}
+.row{display:flex;gap:8px;margin-bottom:10px}
+input,select,button{flex:1;min-width:0;padding:12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px}
+button{background:var(--ac);color:#000;border:0;font-weight:600}
+button.alt{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+label{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mu);margin:0 12px 10px 0}
+input[type=checkbox]{flex:none;width:18px;height:18px;padding:0}
+.opts{display:flex;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:8px}
+.card:first-of-type{border-color:var(--ac)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.p{font-size:20px;font-weight:700;color:var(--ac);white-space:nowrap}
+.p.x{color:var(--er);font-size:15px}
+.m{color:var(--mu);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{font-size:12px;padding:3px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mu)}
+.chip.on{border-color:var(--ac);color:var(--ac);font-weight:600}
+.chip.wa{border-color:var(--wa);color:var(--wa)}
+.chip.er{border-color:var(--er);color:var(--er)}
+a.go{display:inline-block;margin-top:8px;font-size:13px;color:var(--ac)}
+#s,#n{color:var(--mu);margin:8px 0;font-size:13px}
+.sug{display:block;width:100%;text-align:left;margin-bottom:6px}
+</style>
+</head>
+<body>
+<h1>⛽ Carburant le moins cher</h1>
+<div class="row"><input id="c" placeholder="Ville ou code postal" enterkeyhint="search"><button id="q" style="flex:none">Chercher</button></div>
+<div class="row"><button class="alt" id="go">📍 Autour de moi</button></div>
+<div class="row"><select id="bt"><option value="">🇪🇸 Villes frontalières espagnoles…</option></select></div>
+<div id="sug"></div>
+<div class="row">
+<select id="f"></select>
+<select id="r"><option value="5">5 km</option><option value="10" selected>10 km</option><option value="20">20 km</option><option value="40">40 km</option></select>
+</div>
+<div class="opts">
+<label><input type="checkbox" id="rup"> Voir les ruptures</label>
+<label><input type="checkbox" id="cb"> Automate CB seulement</label>
+<label><input type="checkbox" id="es"> 🇪🇸 Inclure l'Espagne</label>
+</div>
+<div id="s"></div>
+<div id="out"></div>
+<div id="n">Paiement : les données officielles n'indiquent pas si la station accepte les espèces ou la carte en caisse. Seule la présence d'un automate CB 24/24 est connue.</div>
+<script>
+const $=id=>document.getElementById(id);
+const FUELS=[["gazole","Gazole"],["e10","SP95-E10"],["sp98","SP98"],["sp95","SP95"],["e85","E85"],["gplc","GPLc"]];
+$("f").innerHTML=FUELS.map(([k,n])=>`<option value="${k}">${n}</option>`).join("");
+const API="https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let pos=null;
+function km(a,b,c,d){const t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),
+h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(h))}
+const svc=x=>{const v=x.services_service;return (Array.isArray(v)?v:String(v||"").split("//")).join("|").toLowerCase()};
+async function fetchRows(where,order,limit){
+  const u=`${API}?where=${encodeURIComponent(where)}${order?"&order_by="+order:""}&limit=${limit}`;
+  const j=await (await fetch(u)).json();return j.results||[];
+}
+const BORDER=[["Irun",43.339,-1.789],["Hondarribia",43.368,-1.791],["Bera",43.283,-1.685],["Dantxarinea (Dancharia)",43.266,-1.533],["Elizondo",43.146,-1.520],["Canfranc",42.703,-0.517],["Jaca",42.570,-0.549],["Bielsa",42.630,0.210],["Vielha",42.703,0.795],["Bossòst",42.787,0.693],["Puigcerdà",42.432,1.929],["Llívia",42.463,1.982],["La Jonquera",42.419,2.875],["Figueres",42.267,2.961],["Portbou",42.428,3.158]];
+$("bt").innerHTML+=BORDER.map(([n,la,lo])=>`<option value="${la},${lo}">${n}</option>`).join("");
+$("bt").onchange=e=>{const v=e.target.value;if(!v)return;const [la,lo]=v.split(",").map(Number);
+  $("c").value=e.target.selectedOptions[0].text;$("es").checked=true;pos={lat:la,lon:lo};search()};
+const num=v=>{const n=parseFloat(String(v||"").replace(",","."));return isNaN(n)?null:n};
+const ESAPI="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroProvincia/";
+let ES=null;
+async function loadES(){
+  if(ES)return ES;
+  const res=await Promise.all([17,25,22,31,20].map(i=>fetch(ESAPI+i,{headers:{Accept:"application/json"}}).then(r=>r.json())));
+  ES=res.flatMap(j=>j.ListaEESSPrecio||[]).map(o=>({lat:num(o["Latitud"]),lon:num(o["Longitud (WGS84)"]),
+    ville:o["Municipio"]||o["Localidad"],adresse:o["Dirección"],nom:o["Rótulo"],hor:o["Horario"],
+    prices:{gazole:num(o["Precio Gasoleo A"]),e10:num(o["Precio Gasolina 95 E10"]),sp95:num(o["Precio Gasolina 95 E5"]),
+      sp98:num(o["Precio Gasolina 98 E5"]),gplc:num(o["Precio Gases licuados del petróleo"]),e85:num(o["Precio Bioetanol"])}})).filter(x=>x.lat!=null&&x.lon!=null);
+  return ES;
+}
+function cardES(x,f,d){
+  const fuels=FUELS.filter(([k])=>x.prices[k]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${x.prices[k].toFixed(3)} €</span>`).join("");
+  return `<div class="card"><div class="top"><div><b>🇪🇸 ${esc(x.ville)}</b><div class="m">${esc(x.nom)} · ${esc(x.adresse)} · ${d.toFixed(1)} km</div></div>
+  <div class="p">${x.prices[f].toFixed(3)} €</div></div>
+  <div class="chips">${x.hor?`<span class="chip">🕒 ${esc(x.hor)}</span>`:""}</div><div class="chips">${fuels}</div>
+  <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lon}">Itinéraire →</a></div>`;
+}
+async function search(){
+  if(!pos)return;
+  const f=$("f").value,r=$("r").value,{lat,lon}=pos;
+  $("s").textContent="Recherche…";$("out").innerHTML="";
+  const near=`within_distance(geom, geom'POINT(${lon} ${lat})', ${r}km)`;
+  try{
+    let rows=await fetchRows(`${near} AND ${f}_prix IS NOT NULL`,`${f}_prix`,40);
+    let rup=$("rup").checked?await fetchRows(`${near} AND ${f}_rupture_type IS NOT NULL AND ${f}_prix IS NULL`,"",20):[];
+    const cb=$("cb").checked;
+    if(cb){rows=rows.filter(x=>svc(x).includes("automate cb"));rup=rup.filter(x=>svc(x).includes("automate cb"))}
+    let items=rows.map(x=>({p:x[f+"_prix"],h:card(x,f,lat,lon)})),note="";
+    if($("es").checked&&!cb){
+      try{(await loadES()).forEach(x=>{const d=km(lat,lon,x.lat,x.lon);if(d<=r&&x.prices[f]!=null)items.push({p:x.prices[f],h:cardES(x,f,d)})})}
+      catch(e){note=" · prix espagnols indisponibles"}
+    }
+    items.sort((a,b)=>a.p-b.p);items=items.slice(0,40);
+    if(!items.length&&!rup.length){$("s").textContent="Aucune station trouvée."+note;return}
+    $("s").textContent=`${items.length} stations avec ${FUELS.find(a=>a[0]==f)[1]} en stock, de la moins chère à la plus chère`+(rup.length?` · ${rup.length} en rupture`:"")+note;
+    $("out").innerHTML=items.map(i=>i.h).concat(rup.map(x=>card(x,f,lat,lon))).join("");
+  }catch(e){$("s").textContent="Erreur de chargement des prix."}
+}
+function card(x,f,lat,lon){
+  const d=km(lat,lon,x.geom.lat,x.geom.lon).toFixed(1),prix=x[f+"_prix"],rt=x[f+"_rupture_type"],rd=(x[f+"_rupture_debut"]||"").slice(0,10),
+  maj=(x[f+"_maj"]||"").slice(0,10),s=svc(x);
+  const stock=rt?`<span class="chip er">⛔ Rupture ${esc(rt)}${rd?" depuis "+esc(rd):""}</span>`:`<span class="chip on">✅ En stock</span>`;
+  const fuels=FUELS.filter(([k])=>x[k+"_prix"]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${x[k+"_prix"].toFixed(3)} €</span>`).join("");
+  const out=FUELS.filter(([k])=>x[k+"_rupture_type"]&&k!=f).map(([k,n])=>`<span class="chip wa">${n} en rupture</span>`).join("");
+  const tags=(s.includes("automate cb")?'<span class="chip">💳 Automate CB 24/24</span>':"")+(x.horaires_automate_24_24==="Oui"?'<span class="chip">🕒 Ouvert 24h/24</span>':"");
+  return `<div class="card"><div class="top"><div><b>${esc(x.ville)}</b><div class="m">${esc(x.adresse)} · ${d} km</div>${maj?`<div class="m">prix maj ${esc(maj)}</div>`:""}</div>
+  <div class="p${prix==null?" x":""}">${prix==null?"—":prix.toFixed(3)+" €"}</div></div>
+  <div class="chips">${stock}${tags}</div><div class="chips">${fuels}${out}</div>
+  <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.geom.lat},${x.geom.lon}">Itinéraire →</a></div>`;
+}
+async function city(){
+  const v=$("c").value.trim();if(!v)return;
+  $("s").textContent="Recherche de la ville…";$("sug").innerHTML="";
+  const p=/^\d{5}$/.test(v)?"codePostal="+v:"nom="+encodeURIComponent(v);
+  try{
+    const l=await (await fetch(`https://geo.api.gouv.fr/communes?${p}&fields=nom,centre,departement&boost=population&limit=5`)).json();
+    if(!l.length){$("s").textContent="Ville introuvable.";return}
+    if(l.length==1)return pick(l[0]);
+    $("s").textContent="Quelle ville ?";
+    $("sug").innerHTML=l.map((c,i)=>`<button class="alt sug" data-i="${i}">${esc(c.nom)} (${esc(c.departement?.code||"")})</button>`).join("");
+    $("sug").onclick=e=>{const i=e.target.dataset.i;if(i!=null)pick(l[i])};
+  }catch(e){$("s").textContent="Erreur de recherche de la ville."}
+}
+function pick(c){$("sug").innerHTML="";$("c").value=c.nom;pos={lat:c.centre.coordinates[1],lon:c.centre.coordinates[0]};search()}
+$("q").onclick=city;
+$("c").onkeydown=e=>{if(e.key==="Enter")city()};
+$("go").onclick=()=>{
+  $("s").textContent="Localisation…";
+  navigator.geolocation.getCurrentPosition(p=>{$("c").value="";pos={lat:p.coords.latitude,lon:p.coords.longitude};search()},
+  ()=>{$("s").textContent="Localisation refusée."},{enableHighAccuracy:true,timeout:10000});
+};
+["f","r","rup","cb","es"].forEach(id=>$(id).onchange=search);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
