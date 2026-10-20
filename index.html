@@ -7,50 +7,66 @@
 <meta name="theme-color" content="#f97316"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <title>Carburant le moins cher</title>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#14171a;--mu:#6b7280;--ac:#16a34a;--bd:#e5e7eb;--wa:#d97706;--er:#dc2626}
+:root{--bg:#f4f5f7;--card:#fff;--tx:#14171a;--mu:#6b7280;--ac:#16a34a;--bd:#e5e7eb;--wa:#d97706;--er:#dc2626}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1214;--card:#1a1e22;--tx:#f1f3f5;--mu:#9aa3ad;--ac:#4ade80;--bd:#2a3037;--wa:#fbbf24;--er:#f87171}}
 *{box-sizing:border-box}
-body{margin:0 auto;background:var(--bg);color:var(--tx);font:16px system-ui,sans-serif;padding:16px;max-width:560px}
-h1{font-size:22px;margin:4px 0 12px}
-.row{display:flex;gap:8px;margin-bottom:10px}
-input,select,button{flex:1;min-width:0;padding:12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px}
+body{margin:0 auto;background:var(--bg);color:var(--tx);font:16px system-ui,sans-serif;padding:14px;max-width:560px}
+h1{font-size:20px;margin:2px 0 12px}
+.row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+input,select,button{flex:1;min-width:0;padding:12px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:16px}
 button{background:var(--ac);color:#000;border:0;font-weight:600}
 button.alt{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
-label{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mu);margin:0 12px 10px 0}
-input[type=checkbox]{flex:none;width:18px;height:18px;padding:0}
-.opts{display:flex;flex-wrap:wrap}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:8px}
-.card:first-of-type{border-color:var(--ac)}
-.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.p{font-size:20px;font-weight:700;color:var(--ac);white-space:nowrap}
-.p.x{color:var(--er);font-size:15px}
+.qk{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch}
+.qk button{flex:none;padding:9px 14px;font-size:14px;border-radius:99px;white-space:nowrap}
+.qk #go{background:var(--ac);color:#000;border:0}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin:6px 0 12px}
+.panel .row:last-child{margin-bottom:0}
+.rg{margin:2px 0 10px}
+input[type=range]{padding:0;border:0;background:none;width:100%;height:32px}
+.tgs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tg{position:relative}
+.tg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
+.tg span{display:inline-block;padding:8px 14px;border-radius:99px;border:1px solid var(--bd);background:var(--bg);font-size:14px;color:var(--mu)}
+.tg input:checked+span{background:var(--ac);border-color:var(--ac);color:#000;font-weight:600}
+input[type=number]{flex:none;width:90px;padding:8px 10px}
 .m{color:var(--mu);font-size:13px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.chip{font-size:12px;padding:3px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mu)}
+#s{color:var(--mu);margin:6px 2px 10px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:10px}
+.card.best{border:2px solid var(--ac)}
+.hd{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.nm{min-width:0}
+.nm b{font-size:17px;line-height:1.25;display:block;word-break:break-word}
+.pr{text-align:right;flex:none}
+.p{font-size:24px;font-weight:800;color:var(--ac);white-space:nowrap;line-height:1.1}
+.p.x{color:var(--er);font-size:18px}
+.best-t{font-size:12px;font-weight:700;color:var(--ac);margin-top:2px}
+.dl{font-size:12px;font-weight:600;color:var(--wa);margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--bd);color:var(--mu)}
 .chip.on{border-color:var(--ac);color:var(--ac);font-weight:600}
 .chip.wa{border-color:var(--wa);color:var(--wa)}
 .chip.er{border-color:var(--er);color:var(--er)}
-a.go{display:inline-block;margin-top:8px;font-size:13px;color:var(--ac)}
-#s,#n{color:var(--mu);margin:8px 0;font-size:13px}
-input[type=range]{padding:0;border:0;background:none;width:100%;height:32px}
+a.go{display:inline-block;margin-top:10px;font-size:14px;font-weight:600;color:var(--ac);text-decoration:none}
+.sec{font-weight:700;margin:14px 2px 8px}
+#n{color:var(--mu);margin:14px 2px;font-size:12px}
 .sug{display:block;width:100%;text-align:left;margin-bottom:6px}
 </style>
 </head>
 <body>
 <h1>⛽ Carburant le moins cher</h1>
 <div class="row"><input id="c" placeholder="Ville ou code postal (France / Espagne)" enterkeyhint="search"><button id="q" style="flex:none">Chercher</button></div>
-<div class="row"><button class="alt" id="go">📍 Autour de moi</button></div>
+<div class="qk" id="qk"><button id="go">📍 Autour de moi</button></div>
 <div class="row"><select id="vl"></select></div>
-<div id="qk" class="chips" style="margin-bottom:10px"></div>
 <div id="sug"></div>
-<div class="row">
-<select id="f"></select>
-<div style="flex:1;min-width:0"><div class="m" id="rl">Rayon : 10 km</div><input type="range" id="r" min="1" max="50" step="1" value="10"></div>
+<div class="panel">
+<div class="row"><select id="f"></select><select id="so"><option value="p">Tri : prix</option><option value="d">Tri : distance</option></select></div>
+<div class="rg"><div class="m" id="rl">Rayon : 10 km</div><input type="range" id="r" min="1" max="50" step="1" value="10"></div>
+<div class="tgs">
+<label class="tg"><input type="checkbox" id="es"><span>🇪🇸 Espagne</span></label>
+<label class="tg"><input type="checkbox" id="rup"><span>⛔ Ruptures</span></label>
+<label class="tg"><input type="checkbox" id="cb"><span>💳 Automate CB</span></label>
 </div>
-<div class="opts">
-<label><input type="checkbox" id="rup"> Voir les ruptures</label>
-<label><input type="checkbox" id="cb"> Automate CB seulement</label>
-<label><input type="checkbox" id="es"> 🇪🇸 Inclure l'Espagne</label>
+<div class="row"><span class="m">Plein de</span><input type="number" id="lt" value="40" min="0" max="200" inputmode="numeric"><span class="m">litres (pour calculer le coût)</span></div>
 </div>
 <div id="s"></div>
 <div id="out"></div>
@@ -60,8 +76,13 @@ const $=id=>document.getElementById(id);
 const FUELS=[["gazole","Gazole"],["e10","SP95-E10"],["sp98","SP98"],["sp95","SP95"],["e85","E85"],["gplc","GPLc"]];
 $("f").innerHTML=FUELS.map(([k,n])=>`<option value="${k}">${n}</option>`).join("");
 const API="https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records";
+const ESAPI="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/";
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let pos=null;
+const f2=n=>n.toFixed(2).replace(".",","),f3=n=>n.toFixed(3).replace(".",",");
+const norm=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const cap=t=>String(t||"").toLowerCase().replace(/(^|[\s\-(.])\S/g,m=>m.toUpperCase());
+const num=v=>{const n=parseFloat(String(v||"").replace(",","."));return isNaN(n)?null:n};
+let pos=null,last=null,ES=null;
 function km(a,b,c,d){const t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),
 h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(h))}
 const svc=x=>{const v=x.services_service;return (Array.isArray(v)?v:String(v||"").split("//")).join("|").toLowerCase()};
@@ -69,9 +90,6 @@ async function fetchRows(where,order,limit){
   const u=`${API}?where=${encodeURIComponent(where)}${order?"&order_by="+order:""}&limit=${limit}`;
   const j=await (await fetch(u)).json();return j.results||[];
 }
-const num=v=>{const n=parseFloat(String(v||"").replace(",","."));return isNaN(n)?null:n};
-const ESAPI="https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/";
-let ES=null;
 async function loadES(){
   if(ES)return ES;
   const res=[await fetch(ESAPI,{headers:{Accept:"application/json"}}).then(r=>r.json())];
@@ -81,18 +99,10 @@ async function loadES(){
       sp98:num(o["Precio Gasolina 98 E5"]),gplc:num(o["Precio Gases licuados del petróleo"]),e85:num(o["Precio Bioetanol"])??num(o["Precio Gasolina 95 E85"])}})).filter(x=>x.lat!=null&&x.lon!=null);
   return ES;
 }
-const cap=t=>String(t||"").toLowerCase().replace(/(^|[\s\-(])\S/g,m=>m.toUpperCase());
-function cardES(x,f,d){
-  const lt=x.loc&&norm(x.loc)!=norm(x.ville)?" ("+cap(x.loc)+")":"";
-  const fuels=FUELS.filter(([k])=>x.prices[k]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${x.prices[k].toFixed(3)} €</span>`).join("");
-  return `<div class="card"><div class="top"><div><b>🇪🇸 ${esc(x.ville)}${esc(lt)}</b><div class="m">${esc(x.nom)} · ${esc(x.adresse)} · ${d.toFixed(1)} km</div></div>
-  <div class="p">${x.prices[f].toFixed(3)} €</div></div>
-  <div class="chips">${x.hor?`<span class="chip">🕒 ${esc(x.hor)}</span>`:""}</div><div class="chips">${fuels}</div>
-  <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lon}">Itinéraire →</a></div>`;
-}
+function itemOf(x,f,lat,lon){return {fr:1,x,p:x[f+"_prix"],d:km(lat,lon,x.geom.lat,x.geom.lon)}}
 async function search(){
   if(!pos)return;
-  const f=$("f").value,r=$("r").value,{lat,lon}=pos;
+  const f=$("f").value,r=+$("r").value,{lat,lon}=pos;
   $("s").textContent="Recherche…";$("out").innerHTML="";
   const near=`within_distance(geom, geom'POINT(${lon} ${lat})', ${r}km)`;
   try{
@@ -100,39 +110,63 @@ async function search(){
     let rup=$("rup").checked?await fetchRows(`${near} AND ${f}_rupture_type IS NOT NULL AND ${f}_prix IS NULL`,"",20):[];
     const cb=$("cb").checked;
     if(cb){rows=rows.filter(x=>svc(x).includes("automate cb"));rup=rup.filter(x=>svc(x).includes("automate cb"))}
-    let items=rows.map(x=>({p:x[f+"_prix"],h:card(x,f,lat,lon)})),note="";
+    let items=rows.map(x=>itemOf(x,f,lat,lon)),note="";
     if($("es").checked&&!cb){
       if(!ES)$("s").textContent="Chargement des prix espagnols (première fois, quelques Mo)…";
-      try{(await loadES()).forEach(x=>{const d=km(lat,lon,x.lat,x.lon);if(d<=r&&x.prices[f]!=null)items.push({p:x.prices[f],h:cardES(x,f,d)})})}
+      try{(await loadES()).forEach(x=>{const d=km(lat,lon,x.lat,x.lon);if(d<=r&&x.prices[f]!=null)items.push({fr:0,x,p:x.prices[f],d})})}
       catch(e){note=" · prix espagnols indisponibles"}
     }
-    items.sort((a,b)=>a.p-b.p);items=items.slice(0,40);
-    if(!items.length&&!rup.length){$("s").textContent="Aucune station trouvée."+note;return}
-    $("s").textContent=`${items.length} stations avec ${FUELS.find(a=>a[0]==f)[1]} en stock, de la moins chère à la plus chère`+(rup.length?` · ${rup.length} en rupture`:"")+note;
-    $("out").innerHTML=items.map(i=>i.h).concat(rup.map(x=>card(x,f,lat,lon))).join("");
+    items.sort((a,b)=>a.p-b.p);
+    last={items:items.slice(0,40),rup:rup.map(x=>itemOf(x,f,lat,lon)),f,r,note};
+    render();
   }catch(e){$("s").textContent="Erreur de chargement des prix."}
 }
-function card(x,f,lat,lon){
-  const d=km(lat,lon,x.geom.lat,x.geom.lon).toFixed(1),prix=x[f+"_prix"],rt=x[f+"_rupture_type"],rd=(x[f+"_rupture_debut"]||"").slice(0,10),
-  maj=(x[f+"_maj"]||"").slice(0,10),s=svc(x);
-  const stock=rt?`<span class="chip er">⛔ Rupture ${esc(rt)}${rd?" depuis "+esc(rd):""}</span>`:`<span class="chip on">✅ En stock</span>`;
-  const fuels=FUELS.filter(([k])=>x[k+"_prix"]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${x[k+"_prix"].toFixed(3)} €</span>`).join("");
-  const out=FUELS.filter(([k])=>x[k+"_rupture_type"]&&k!=f).map(([k,n])=>`<span class="chip wa">${n} en rupture</span>`).join("");
-  const tags=(s.includes("automate cb")?'<span class="chip">💳 Automate CB 24/24</span>':"")+(x.horaires_automate_24_24==="Oui"?'<span class="chip">🕒 Ouvert 24h/24</span>':"");
-  return `<div class="card"><div class="top"><div><b>${esc(x.ville)}</b><div class="m">${esc(x.adresse)} · ${d} km</div>${maj?`<div class="m">prix maj ${esc(maj)}</div>`:""}</div>
-  <div class="p${prix==null?" x":""}">${prix==null?"—":prix.toFixed(3)+" €"}</div></div>
-  <div class="chips">${stock}${tags}</div><div class="chips">${fuels}${out}</div>
-  <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.geom.lat},${x.geom.lon}">Itinéraire →</a></div>`;
+function render(){
+  if(!last)return;
+  const {items,rup,f,r,note}=last,L=+$("lt").value||0;
+  if(!items.length&&!rup.length){$("s").textContent="Aucune station trouvée."+note;$("out").innerHTML="";return}
+  const min=items.length?Math.min(...items.map(i=>i.p)):0;
+  const list=items.slice();if($("so").value=="d")list.sort((a,b)=>a.d-b.d);
+  $("s").textContent=`${items.length} stations · ${FUELS.find(a=>a[0]==f)[1]} · rayon ${r} km`+(rup.length?` · ${rup.length} en rupture`:"")+note;
+  $("out").innerHTML=list.map(i=>cardHTML(i,f,min,L)).join("")+(rup.length?`<div class="sec">⛔ En rupture de ${FUELS.find(a=>a[0]==f)[1]}</div>`+rup.map(i=>cardHTML(i,f,min,L)).join(""):"");
+}
+function cardHTML(it,f,min,L){
+  const x=it.x,p=it.p,d=it.d.toFixed(1).replace(".",",");
+  let title,sub,addr,chips="",fuels="",la,lo;
+  if(it.fr){
+    const maj=(x[f+"_maj"]||"").slice(0,10),s=svc(x),rt=x[f+"_rupture_type"],rd=(x[f+"_rupture_debut"]||"").slice(0,10);
+    title="🇫🇷 "+esc(x.ville);sub=`📍 ${d} km`+(maj?` · prix du ${esc(maj)}`:"");addr=esc(x.adresse);la=x.geom.lat;lo=x.geom.lon;
+    chips=(rt?`<span class="chip er">⛔ Rupture ${esc(rt)}${rd?" depuis "+esc(rd):""}</span>`:`<span class="chip on">✅ En stock</span>`)
+      +(s.includes("automate cb")?'<span class="chip">💳 Automate CB 24/24</span>':"")
+      +(x.horaires_automate_24_24==="Oui"?'<span class="chip">🕒 Ouvert 24h/24</span>':"");
+    fuels=FUELS.filter(([k])=>x[k+"_prix"]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${f3(x[k+"_prix"])} €</span>`).join("")
+      +FUELS.filter(([k])=>x[k+"_rupture_type"]&&k!=f).map(([k,n])=>`<span class="chip wa">${n} en rupture</span>`).join("");
+  }else{
+    const lt=x.loc&&norm(x.loc)!=norm(x.ville)?" ("+cap(x.loc)+")":"";
+    title="🇪🇸 "+esc(cap(x.nom)||x.ville);sub=`📍 ${esc(x.ville)}${esc(lt)} · ${d} km`;addr=esc(cap(x.adresse));la=x.lat;lo=x.lon;
+    chips=x.hor?`<span class="chip">🕒 ${esc(x.hor)}</span>`:"";
+    fuels=FUELS.filter(([k])=>x.prices[k]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${f3(x.prices[k])} €</span>`).join("");
+  }
+  let pr,best="";
+  if(p==null)pr='<div class="p x">—</div>';
+  else{
+    const isBest=p-min<0.0005;if(isBest)best=" best";
+    pr=`<div class="p">${f3(p)} €</div>`;
+    if(L>0)pr+=`<div class="m">Plein ${L} L : ${f2(p*L)} €</div>`;
+    pr+=isBest?'<div class="best-t">Meilleur prix</div>':`<div class="dl">+${L>0?f2((p-min)*L)+" € sur le plein":f3(p-min)+" €/L"}</div>`;
+  }
+  return `<div class="card${best}"><div class="hd"><div class="nm"><b>${title}</b><div class="m">${sub}</div><div class="m">${addr}</div></div><div class="pr">${pr}</div></div>
+  <div class="chips">${chips}</div><div class="chips">${fuels}</div>
+  <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${la},${lo}">Itinéraire →</a></div>`;
 }
 const CITIES=[
 ["fr","Hendaye",43.359,-1.774],["fr","Saint-Jean-de-Luz",43.388,-1.662],["fr","Biarritz",43.483,-1.558],["fr","Bayonne",43.493,-1.475],["fr","Saint-Jean-Pied-de-Port",43.164,-1.237],["fr","Pau",43.295,-0.371],["fr","Lourdes",43.095,-0.046],["fr","Tarbes",43.233,0.073],["fr","Saint-Gaudens",43.108,0.724],["fr","Foix",42.965,1.607],["fr","Bourg-Madame",42.433,1.947],["fr","Perpignan",42.699,2.895],["fr","Le Boulou",42.525,2.833],["fr","Céret",42.487,2.749],["fr","Argelès-sur-Mer",42.546,3.022],["fr","Cerbère",42.442,3.168],["fr","Bordeaux",44.838,-0.579],["fr","Toulouse",43.604,1.444],["fr","Montpellier",43.611,3.877],["fr","Marseille",43.296,5.370],["fr","Lyon",45.764,4.836],["fr","Paris",48.857,2.352],
 ["es","Irun",43.339,-1.789],["es","Hondarribia",43.368,-1.791],["es","Bera",43.283,-1.685],["es","Dancharia",43.266,-1.533,"dantcharia dancharinea dantxarinea"],["es","Behobia (Béhobie)",43.356,-1.766,"behobie"],["es","Elizondo",43.146,-1.520],["es","San Sebastián (Donostia)",43.318,-1.981],["es","Pamplona",42.812,-1.645],["es","Bilbao",43.263,-2.935],["es","Vitoria-Gasteiz",42.846,-2.673],["es","Logroño",42.466,-2.446],["es","Canfranc",42.703,-0.517],["es","Jaca",42.570,-0.549],["es","Huesca",42.140,-0.408],["es","Zaragoza",41.649,-0.889],["es","Vielha",42.703,0.795],["es","Lleida",41.617,0.620],["es","Puigcerdà",42.432,1.929],["es","La Jonquera",42.419,2.875],["es","Figueres",42.267,2.961],["es","Portbou",42.428,3.158],["es","Girona",41.983,2.824],["es","Barcelona",41.385,2.173],["es","Madrid",40.417,-3.704],["es","Valencia",39.470,-0.376]];
-const norm=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const flag=c=>c=="fr"?"🇫🇷":"🇪🇸";
 (()=>{const g=c=>CITIES.map((x,i)=>x[0]==c?`<option value="${i}">${x[1]}</option>`:"").join("");
-$("vl").innerHTML=`<option value="">Choisir une ville dans la liste…</option><optgroup label="🇫🇷 France">${g("fr")}</optgroup><optgroup label="🇪🇸 Espagne">${g("es")}</optgroup>`})();
+$("vl").innerHTML=`<option value="">Plus de villes…</option><optgroup label="🇫🇷 France">${g("fr")}</optgroup><optgroup label="🇪🇸 Espagne">${g("es")}</optgroup>`})();
 const QUICK=["Irun","Behobia (Béhobie)","Dancharia","Hendaye"];
-$("qk").innerHTML=QUICK.map(n=>{const i=CITIES.findIndex(c=>c[1]==n);return `<button class="alt" style="flex:none;padding:8px 12px;font-size:14px" data-i="${i}">${flag(CITIES[i][0])} ${n}</button>`}).join("");
+$("qk").insertAdjacentHTML("beforeend",QUICK.map(n=>{const i=CITIES.findIndex(c=>c[1]==n);return `<button class="alt" data-i="${i}">${flag(CITIES[i][0])} ${n}</button>`}).join(""));
 $("qk").onclick=e=>{const c=CITIES[e.target.dataset.i];if(c)pick({n:c[1],lat:c[2],lon:c[3],es:c[0]=="es"})};
 $("vl").onchange=e=>{const c=CITIES[e.target.value];if(c)pick({n:c[1],lat:c[2],lon:c[3],es:c[0]=="es"})};
 async function city(){
@@ -163,6 +197,7 @@ $("go").onclick=()=>{
 };
 $("r").oninput=()=>{$("rl").textContent="Rayon : "+$("r").value+" km"};
 ["f","r","rup","cb","es"].forEach(id=>$(id).onchange=search);
+$("so").onchange=render;$("lt").oninput=render;
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script>
 </body>
