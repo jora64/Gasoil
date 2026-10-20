@@ -47,6 +47,14 @@ input[type=number]{flex:none;width:90px;padding:8px 10px}
 .chip.wa{border-color:var(--wa);color:var(--wa)}
 .chip.er{border-color:var(--er);color:var(--er)}
 a.go{display:inline-block;margin-top:10px;font-size:14px;font-weight:600;color:var(--ac);text-decoration:none}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+.tab.on{background:var(--ac);color:#000;border-color:var(--ac)}
+.act{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.act a.go{margin-top:0}
+.star{flex:none;padding:6px 12px;font-size:13px;border-radius:99px;background:var(--card);color:var(--mu);border:1px solid var(--bd);font-weight:600}
+.star.on{background:var(--wa);color:#000;border-color:var(--wa)}
+.empty{color:var(--mu);text-align:center;padding:30px 10px;line-height:1.5}
 .sec{font-weight:700;margin:14px 2px 8px}
 #n{color:var(--mu);margin:14px 2px;font-size:12px}
 .sug{display:block;width:100%;text-align:left;margin-bottom:6px}
@@ -54,18 +62,21 @@ a.go{display:inline-block;margin-top:10px;font-size:14px;font-weight:600;color:v
 </head>
 <body>
 <h1>⛽ Carburant le moins cher</h1>
+<div class="tabs"><button class="tab on" id="t1">🔍 Recherche</button><button class="tab" id="t2">⭐ Favoris <span id="fc"></span></button></div>
+<div id="vs">
 <div class="row"><input id="c" placeholder="Ville ou code postal (France / Espagne)" enterkeyhint="search"><button id="q" style="flex:none">Chercher</button></div>
 <div class="qk" id="qk"><button id="go">📍 Autour de moi</button></div>
 <div class="row"><select id="vl"></select></div>
 <div id="sug"></div>
+</div>
 <div class="panel">
 <div class="row"><select id="f"></select><select id="so"><option value="p">Tri : prix</option><option value="d">Tri : distance</option></select></div>
-<div class="rg"><div class="m" id="rl">Rayon : 10 km</div><input type="range" id="r" min="1" max="50" step="1" value="10"></div>
+<div id="vr"><div class="rg"><div class="m" id="rl">Rayon : 10 km</div><input type="range" id="r" min="1" max="50" step="1" value="10"></div>
 <div class="tgs">
 <label class="tg"><input type="checkbox" id="es"><span>🇪🇸 Espagne</span></label>
 <label class="tg"><input type="checkbox" id="rup"><span>⛔ Ruptures</span></label>
 <label class="tg"><input type="checkbox" id="cb"><span>💳 Automate CB</span></label>
-</div>
+</div></div>
 <div class="row"><span class="m">Plein de</span><input type="number" id="lt" value="40" min="0" max="200" inputmode="numeric"><span class="m">litres (pour calculer le coût)</span></div>
 </div>
 <div id="s"></div>
@@ -82,7 +93,13 @@ const f2=n=>n.toFixed(2).replace(".",","),f3=n=>n.toFixed(3).replace(".",",");
 const norm=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const cap=t=>String(t||"").toLowerCase().replace(/(^|[\s\-(.])\S/g,m=>m.toUpperCase());
 const num=v=>{const n=parseFloat(String(v||"").replace(",","."));return isNaN(n)?null:n};
-let pos=null,last=null,ES=null;
+let pos=null,last=null,ES=null,lastFav=null,tab=1,FAV=[];
+try{FAV=JSON.parse(localStorage.getItem("fav")||"[]")}catch(e){}
+const REG={};
+const saveFav=()=>{try{localStorage.setItem("fav",JSON.stringify(FAV))}catch(e){}};
+const isFav=k=>FAV.some(f=>f.k==k);
+const updFc=()=>{$("fc").textContent=FAV.length?"("+FAV.length+")":""};
+const keyOf=it=>{const x=it.x,la=it.fr?x.geom.lat:x.lat,lo=it.fr?x.geom.lon:x.lon;return (it.fr?"f":"e")+(x.id??(la+","+lo))};
 function km(a,b,c,d){const t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),
 h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 12742*Math.asin(Math.sqrt(h))}
 const svc=x=>{const v=x.services_service;return (Array.isArray(v)?v:String(v||"").split("//")).join("|").toLowerCase()};
@@ -94,7 +111,7 @@ async function loadES(){
   if(ES)return ES;
   const res=[await fetch(ESAPI,{headers:{Accept:"application/json"}}).then(r=>r.json())];
   ES=res.flatMap(j=>j.ListaEESSPrecio||[]).map(o=>({lat:num(o["Latitud"]),lon:num(o["Longitud (WGS84)"]),
-    ville:o["Municipio"]||o["Localidad"],loc:o["Localidad"],adresse:o["Dirección"],nom:o["Rótulo"],hor:o["Horario"],
+    id:o["IDEESS"],ville:o["Municipio"]||o["Localidad"],loc:o["Localidad"],adresse:o["Dirección"],nom:o["Rótulo"],hor:o["Horario"],
     prices:{gazole:num(o["Precio Gasoleo A"]),e10:num(o["Precio Gasolina 95 E10"]),sp95:num(o["Precio Gasolina 95 E5"]),
       sp98:num(o["Precio Gasolina 98 E5"]),gplc:num(o["Precio Gases licuados del petróleo"]),e85:num(o["Precio Bioetanol"])??num(o["Precio Gasolina 95 E85"])}})).filter(x=>x.lat!=null&&x.lon!=null);
   return ES;
@@ -131,11 +148,11 @@ function render(){
   $("out").innerHTML=list.map(i=>cardHTML(i,f,min,L)).join("")+(rup.length?`<div class="sec">⛔ En rupture de ${FUELS.find(a=>a[0]==f)[1]}</div>`+rup.map(i=>cardHTML(i,f,min,L)).join(""):"");
 }
 function cardHTML(it,f,min,L){
-  const x=it.x,p=it.p,d=it.d.toFixed(1).replace(".",",");
+  const x=it.x,p=it.p,d=it.d==null?"":it.d.toFixed(1).replace(".",",");
   let title,sub,addr,chips="",fuels="",la,lo;
   if(it.fr){
     const maj=(x[f+"_maj"]||"").slice(0,10),s=svc(x),rt=x[f+"_rupture_type"],rd=(x[f+"_rupture_debut"]||"").slice(0,10);
-    title="🇫🇷 "+esc(x.ville);sub=`📍 ${d} km`+(maj?` · prix du ${esc(maj)}`:"");addr=esc(x.adresse);la=x.geom.lat;lo=x.geom.lon;
+    title="🇫🇷 "+esc(x.ville);sub=(d?`📍 ${d} km`:"")+(maj?(d?" · ":"")+`prix du ${esc(maj)}`:"");addr=esc(x.adresse);la=x.geom.lat;lo=x.geom.lon;
     chips=(rt?`<span class="chip er">⛔ Rupture ${esc(rt)}${rd?" depuis "+esc(rd):""}</span>`:`<span class="chip on">✅ En stock</span>`)
       +(s.includes("automate cb")?'<span class="chip">💳 Automate CB 24/24</span>':"")
       +(x.horaires_automate_24_24==="Oui"?'<span class="chip">🕒 Ouvert 24h/24</span>':"");
@@ -143,10 +160,11 @@ function cardHTML(it,f,min,L){
       +FUELS.filter(([k])=>x[k+"_rupture_type"]&&k!=f).map(([k,n])=>`<span class="chip wa">${n} en rupture</span>`).join("");
   }else{
     const lt=x.loc&&norm(x.loc)!=norm(x.ville)?" ("+cap(x.loc)+")":"";
-    title="🇪🇸 "+esc(cap(x.nom)||x.ville);sub=`📍 ${esc(x.ville)}${esc(lt)} · ${d} km`;addr=esc(cap(x.adresse));la=x.lat;lo=x.lon;
+    title="🇪🇸 "+esc(cap(x.nom)||x.ville);sub=`📍 ${esc(x.ville)}${esc(lt)}`+(d?` · ${d} km`:"");addr=esc(cap(x.adresse));la=x.lat;lo=x.lon;
     chips=x.hor?`<span class="chip">🕒 ${esc(x.hor)}</span>`:"";
     fuels=FUELS.filter(([k])=>x.prices[k]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${f3(x.prices[k])} €</span>`).join("");
   }
+  const k=keyOf(it);REG[k]={k,fr:it.fr,id:x.id,t:it.fr?x.ville:(cap(x.nom)||x.ville),la,lo};
   let pr,best="";
   if(p==null)pr='<div class="p x">—</div>';
   else{
@@ -157,7 +175,50 @@ function cardHTML(it,f,min,L){
   }
   return `<div class="card${best}"><div class="hd"><div class="nm"><b>${title}</b><div class="m">${sub}</div><div class="m">${addr}</div></div><div class="pr">${pr}</div></div>
   <div class="chips">${chips}</div><div class="chips">${fuels}</div>
-  <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${la},${lo}">Itinéraire →</a></div>`;
+  <div class="act"><a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${la},${lo}">Itinéraire →</a><button class="star${isFav(k)?" on":""}" data-k="${esc(k)}">${isFav(k)?"★ Favori":"☆ Favori"}</button></div></div>`;
+}
+function toggleFav(k){
+  const i=FAV.findIndex(f=>f.k==k);
+  if(i>=0)FAV.splice(i,1);else if(REG[k])FAV.push(REG[k]);
+  saveFav();updFc();
+  if(tab==2&&lastFav){lastFav.ok=lastFav.ok.filter(r=>isFav(keyOf(r)));lastFav.miss=lastFav.miss.filter(m=>isFav(m.k));renderFav()}
+  else render();
+}
+function renderFav(){
+  if(!lastFav)return;
+  const {ok,miss,f}=lastFav,L=+$("lt").value||0;
+  if(!FAV.length){$("s").textContent="";$("out").innerHTML=`<div class="empty">⭐ Aucun favori pour l'instant.<br>Fais une recherche, puis touche « ☆ Favori » sur une station.</div>`;return}
+  const priced=ok.filter(r=>r.p!=null),min=priced.length?Math.min(...priced.map(r=>r.p)):0;
+  $("s").textContent=`${FAV.length} favori${FAV.length>1?"s":""} · ${FUELS.find(a=>a[0]==f)[1]}`;
+  $("out").innerHTML=ok.map(r=>cardHTML(r,f,min,L)).join("")+miss.map(m=>`<div class="card"><div class="hd"><div class="nm"><b>${esc(m.t)}</b><div class="m">Prix indisponibles pour l'instant</div></div></div><div class="act"><span></span><button class="star on" data-k="${esc(m.k)}">★ Favori</button></div></div>`).join("");
+}
+async function showFavs(){
+  const f=$("f").value;
+  if(!FAV.length){lastFav={ok:[],miss:[],f};renderFav();return}
+  $("s").textContent="Mise à jour des favoris…";$("out").innerHTML="";
+  const res=await Promise.all(FAV.map(async fv=>{
+    try{
+      let x;
+      if(fv.fr){
+        const rows=await fetchRows(`within_distance(geom, geom'POINT(${fv.lo} ${fv.la})', 0.3km)`,"",5);
+        x=rows.find(r=>String(r.id)==String(fv.id))||rows[0];
+        if(!x)return {miss:fv};
+        return {fr:1,x,p:x[f+"_prix"],d:pos?km(pos.lat,pos.lon,x.geom.lat,x.geom.lon):null};
+      }
+      const es=await loadES();
+      x=es.find(e=>String(e.id)==String(fv.id))||es.find(e=>km(fv.la,fv.lo,e.lat,e.lon)<0.3);
+      if(!x)return {miss:fv};
+      return {fr:0,x,p:x.prices[f],d:pos?km(pos.lat,pos.lon,x.lat,x.lon):null};
+    }catch(e){return {miss:fv}}
+  }));
+  if(tab!=2)return;
+  lastFav={ok:res.filter(r=>!r.miss).sort((a,b)=>(a.p??9e9)-(b.p??9e9)),miss:res.filter(r=>r.miss).map(r=>r.miss),f};
+  renderFav();
+}
+function setTab(n){
+  tab=n;$("t1").classList.toggle("on",n==1);$("t2").classList.toggle("on",n==2);
+  const d=n==1?"":"none";$("vs").style.display=d;$("vr").style.display=d;$("so").style.display=d;
+  if(n==1){$("out").innerHTML="";$("s").textContent="";render()}else showFavs();
 }
 const CITIES=[
 ["fr","Hendaye",43.359,-1.774],["fr","Saint-Jean-de-Luz",43.388,-1.662],["fr","Biarritz",43.483,-1.558],["fr","Bayonne",43.493,-1.475],["fr","Saint-Jean-Pied-de-Port",43.164,-1.237],["fr","Pau",43.295,-0.371],["fr","Lourdes",43.095,-0.046],["fr","Tarbes",43.233,0.073],["fr","Saint-Gaudens",43.108,0.724],["fr","Foix",42.965,1.607],["fr","Bourg-Madame",42.433,1.947],["fr","Perpignan",42.699,2.895],["fr","Le Boulou",42.525,2.833],["fr","Céret",42.487,2.749],["fr","Argelès-sur-Mer",42.546,3.022],["fr","Cerbère",42.442,3.168],["fr","Bordeaux",44.838,-0.579],["fr","Toulouse",43.604,1.444],["fr","Montpellier",43.611,3.877],["fr","Marseille",43.296,5.370],["fr","Lyon",45.764,4.836],["fr","Paris",48.857,2.352],
@@ -196,8 +257,12 @@ $("go").onclick=()=>{
   ()=>{$("s").textContent="Localisation refusée."},{enableHighAccuracy:true,timeout:10000});
 };
 $("r").oninput=()=>{$("rl").textContent="Rayon : "+$("r").value+" km"};
-["f","r","rup","cb","es"].forEach(id=>$(id).onchange=search);
-$("so").onchange=render;$("lt").oninput=render;
+["r","rup","cb","es"].forEach(id=>$(id).onchange=search);
+$("f").onchange=()=>tab==2?showFavs():search();
+$("t1").onclick=()=>setTab(1);$("t2").onclick=()=>setTab(2);
+$("out").onclick=e=>{const b=e.target.closest&&e.target.closest(".star");if(b)toggleFav(b.dataset.k)};
+updFc();
+$("so").onchange=render;$("lt").oninput=()=>tab==2?renderFav():render();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script>
 </body>
