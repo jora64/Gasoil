@@ -32,6 +32,7 @@ input[type=checkbox]{flex:none;width:18px;height:18px;padding:0}
 .chip.er{border-color:var(--er);color:var(--er)}
 a.go{display:inline-block;margin-top:8px;font-size:13px;color:var(--ac)}
 #s,#n{color:var(--mu);margin:8px 0;font-size:13px}
+input[type=range]{padding:0;border:0;background:none;width:100%;height:32px}
 .sug{display:block;width:100%;text-align:left;margin-bottom:6px}
 </style>
 </head>
@@ -44,7 +45,7 @@ a.go{display:inline-block;margin-top:8px;font-size:13px;color:var(--ac)}
 <div id="sug"></div>
 <div class="row">
 <select id="f"></select>
-<select id="r"><option value="5">5 km</option><option value="10" selected>10 km</option><option value="20">20 km</option><option value="40">40 km</option></select>
+<div style="flex:1;min-width:0"><div class="m" id="rl">Rayon : 10 km</div><input type="range" id="r" min="1" max="50" step="1" value="10"></div>
 </div>
 <div class="opts">
 <label><input type="checkbox" id="rup"> Voir les ruptures</label>
@@ -75,14 +76,16 @@ async function loadES(){
   if(ES)return ES;
   const res=[await fetch(ESAPI,{headers:{Accept:"application/json"}}).then(r=>r.json())];
   ES=res.flatMap(j=>j.ListaEESSPrecio||[]).map(o=>({lat:num(o["Latitud"]),lon:num(o["Longitud (WGS84)"]),
-    ville:o["Municipio"]||o["Localidad"],adresse:o["Dirección"],nom:o["Rótulo"],hor:o["Horario"],
+    ville:o["Municipio"]||o["Localidad"],loc:o["Localidad"],adresse:o["Dirección"],nom:o["Rótulo"],hor:o["Horario"],
     prices:{gazole:num(o["Precio Gasoleo A"]),e10:num(o["Precio Gasolina 95 E10"]),sp95:num(o["Precio Gasolina 95 E5"]),
       sp98:num(o["Precio Gasolina 98 E5"]),gplc:num(o["Precio Gases licuados del petróleo"]),e85:num(o["Precio Bioetanol"])??num(o["Precio Gasolina 95 E85"])}})).filter(x=>x.lat!=null&&x.lon!=null);
   return ES;
 }
+const cap=t=>String(t||"").toLowerCase().replace(/(^|[\s\-(])\S/g,m=>m.toUpperCase());
 function cardES(x,f,d){
+  const lt=x.loc&&norm(x.loc)!=norm(x.ville)?" ("+cap(x.loc)+")":"";
   const fuels=FUELS.filter(([k])=>x.prices[k]!=null).map(([k,n])=>`<span class="chip${k==f?" on":""}">${n} ${x.prices[k].toFixed(3)} €</span>`).join("");
-  return `<div class="card"><div class="top"><div><b>🇪🇸 ${esc(x.ville)}</b><div class="m">${esc(x.nom)} · ${esc(x.adresse)} · ${d.toFixed(1)} km</div></div>
+  return `<div class="card"><div class="top"><div><b>🇪🇸 ${esc(x.ville)}${esc(lt)}</b><div class="m">${esc(x.nom)} · ${esc(x.adresse)} · ${d.toFixed(1)} km</div></div>
   <div class="p">${x.prices[f].toFixed(3)} €</div></div>
   <div class="chips">${x.hor?`<span class="chip">🕒 ${esc(x.hor)}</span>`:""}</div><div class="chips">${fuels}</div>
   <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lon}">Itinéraire →</a></div>`;
@@ -122,13 +125,13 @@ function card(x,f,lat,lon){
   <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.geom.lat},${x.geom.lon}">Itinéraire →</a></div>`;
 }
 const CITIES=[
-["fr","Hendaye",43.359,-1.774],["fr","Saint-Jean-de-Luz",43.388,-1.662],["fr","Dancharia (Ainhoa)",43.300,-1.500,"dantcharia dancharinea"],["fr","Biarritz",43.483,-1.558],["fr","Bayonne",43.493,-1.475],["fr","Saint-Jean-Pied-de-Port",43.164,-1.237],["fr","Pau",43.295,-0.371],["fr","Lourdes",43.095,-0.046],["fr","Tarbes",43.233,0.073],["fr","Saint-Gaudens",43.108,0.724],["fr","Foix",42.965,1.607],["fr","Bourg-Madame",42.433,1.947],["fr","Perpignan",42.699,2.895],["fr","Le Boulou",42.525,2.833],["fr","Céret",42.487,2.749],["fr","Argelès-sur-Mer",42.546,3.022],["fr","Cerbère",42.442,3.168],["fr","Bordeaux",44.838,-0.579],["fr","Toulouse",43.604,1.444],["fr","Montpellier",43.611,3.877],["fr","Marseille",43.296,5.370],["fr","Lyon",45.764,4.836],["fr","Paris",48.857,2.352],
-["es","Irun",43.339,-1.789],["es","Hondarribia",43.368,-1.791],["es","Bera",43.283,-1.685],["es","Dantxarinea (Dancharia)",43.266,-1.533,"dantcharia dancharinea"],["es","Behobia (Béhobie)",43.356,-1.766,"behobie"],["es","Elizondo",43.146,-1.520],["es","San Sebastián (Donostia)",43.318,-1.981],["es","Pamplona",42.812,-1.645],["es","Bilbao",43.263,-2.935],["es","Vitoria-Gasteiz",42.846,-2.673],["es","Logroño",42.466,-2.446],["es","Canfranc",42.703,-0.517],["es","Jaca",42.570,-0.549],["es","Huesca",42.140,-0.408],["es","Zaragoza",41.649,-0.889],["es","Vielha",42.703,0.795],["es","Lleida",41.617,0.620],["es","Puigcerdà",42.432,1.929],["es","La Jonquera",42.419,2.875],["es","Figueres",42.267,2.961],["es","Portbou",42.428,3.158],["es","Girona",41.983,2.824],["es","Barcelona",41.385,2.173],["es","Madrid",40.417,-3.704],["es","Valencia",39.470,-0.376]];
+["fr","Hendaye",43.359,-1.774],["fr","Saint-Jean-de-Luz",43.388,-1.662],["fr","Biarritz",43.483,-1.558],["fr","Bayonne",43.493,-1.475],["fr","Saint-Jean-Pied-de-Port",43.164,-1.237],["fr","Pau",43.295,-0.371],["fr","Lourdes",43.095,-0.046],["fr","Tarbes",43.233,0.073],["fr","Saint-Gaudens",43.108,0.724],["fr","Foix",42.965,1.607],["fr","Bourg-Madame",42.433,1.947],["fr","Perpignan",42.699,2.895],["fr","Le Boulou",42.525,2.833],["fr","Céret",42.487,2.749],["fr","Argelès-sur-Mer",42.546,3.022],["fr","Cerbère",42.442,3.168],["fr","Bordeaux",44.838,-0.579],["fr","Toulouse",43.604,1.444],["fr","Montpellier",43.611,3.877],["fr","Marseille",43.296,5.370],["fr","Lyon",45.764,4.836],["fr","Paris",48.857,2.352],
+["es","Irun",43.339,-1.789],["es","Hondarribia",43.368,-1.791],["es","Bera",43.283,-1.685],["es","Dancharia",43.266,-1.533,"dantcharia dancharinea dantxarinea"],["es","Behobia (Béhobie)",43.356,-1.766,"behobie"],["es","Elizondo",43.146,-1.520],["es","San Sebastián (Donostia)",43.318,-1.981],["es","Pamplona",42.812,-1.645],["es","Bilbao",43.263,-2.935],["es","Vitoria-Gasteiz",42.846,-2.673],["es","Logroño",42.466,-2.446],["es","Canfranc",42.703,-0.517],["es","Jaca",42.570,-0.549],["es","Huesca",42.140,-0.408],["es","Zaragoza",41.649,-0.889],["es","Vielha",42.703,0.795],["es","Lleida",41.617,0.620],["es","Puigcerdà",42.432,1.929],["es","La Jonquera",42.419,2.875],["es","Figueres",42.267,2.961],["es","Portbou",42.428,3.158],["es","Girona",41.983,2.824],["es","Barcelona",41.385,2.173],["es","Madrid",40.417,-3.704],["es","Valencia",39.470,-0.376]];
 const norm=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const flag=c=>c=="fr"?"🇫🇷":"🇪🇸";
 (()=>{const g=c=>CITIES.map((x,i)=>x[0]==c?`<option value="${i}">${x[1]}</option>`:"").join("");
 $("vl").innerHTML=`<option value="">Choisir une ville dans la liste…</option><optgroup label="🇫🇷 France">${g("fr")}</optgroup><optgroup label="🇪🇸 Espagne">${g("es")}</optgroup>`})();
-const QUICK=["Irun","Behobia (Béhobie)","Dantxarinea (Dancharia)","Dancharia (Ainhoa)","Hendaye"];
+const QUICK=["Irun","Behobia (Béhobie)","Dancharia","Hendaye"];
 $("qk").innerHTML=QUICK.map(n=>{const i=CITIES.findIndex(c=>c[1]==n);return `<button class="alt" style="flex:none;padding:8px 12px;font-size:14px" data-i="${i}">${flag(CITIES[i][0])} ${n}</button>`}).join("");
 $("qk").onclick=e=>{const c=CITIES[e.target.dataset.i];if(c)pick({n:c[1],lat:c[2],lon:c[3],es:c[0]=="es"})};
 $("vl").onchange=e=>{const c=CITIES[e.target.value];if(c)pick({n:c[1],lat:c[2],lon:c[3],es:c[0]=="es"})};
@@ -158,6 +161,7 @@ $("go").onclick=()=>{
   navigator.geolocation.getCurrentPosition(p=>{$("c").value="";pos={lat:p.coords.latitude,lon:p.coords.longitude};search()},
   ()=>{$("s").textContent="Localisation refusée."},{enableHighAccuracy:true,timeout:10000});
 };
+$("r").oninput=()=>{$("rl").textContent="Rayon : "+$("r").value+" km"};
 ["f","r","rup","cb","es"].forEach(id=>$(id).onchange=search);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 </script>
