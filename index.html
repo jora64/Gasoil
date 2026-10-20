@@ -40,6 +40,7 @@ a.go{display:inline-block;margin-top:8px;font-size:13px;color:var(--ac)}
 <div class="row"><input id="c" placeholder="Ville ou code postal (France / Espagne)" enterkeyhint="search"><button id="q" style="flex:none">Chercher</button></div>
 <div class="row"><button class="alt" id="go">📍 Autour de moi</button></div>
 <div class="row"><select id="vl"></select></div>
+<div id="qk" class="chips" style="margin-bottom:10px"></div>
 <div id="sug"></div>
 <div class="row">
 <select id="f"></select>
@@ -76,7 +77,7 @@ async function loadES(){
   ES=res.flatMap(j=>j.ListaEESSPrecio||[]).map(o=>({lat:num(o["Latitud"]),lon:num(o["Longitud (WGS84)"]),
     ville:o["Municipio"]||o["Localidad"],adresse:o["Dirección"],nom:o["Rótulo"],hor:o["Horario"],
     prices:{gazole:num(o["Precio Gasoleo A"]),e10:num(o["Precio Gasolina 95 E10"]),sp95:num(o["Precio Gasolina 95 E5"]),
-      sp98:num(o["Precio Gasolina 98 E5"]),gplc:num(o["Precio Gases licuados del petróleo"]),e85:num(o["Precio Bioetanol"])}})).filter(x=>x.lat!=null&&x.lon!=null);
+      sp98:num(o["Precio Gasolina 98 E5"]),gplc:num(o["Precio Gases licuados del petróleo"]),e85:num(o["Precio Bioetanol"])??num(o["Precio Gasolina 95 E85"])}})).filter(x=>x.lat!=null&&x.lon!=null);
   return ES;
 }
 function cardES(x,f,d){
@@ -121,12 +122,15 @@ function card(x,f,lat,lon){
   <a class="go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.geom.lat},${x.geom.lon}">Itinéraire →</a></div>`;
 }
 const CITIES=[
-["fr","Hendaye",43.359,-1.774],["fr","Saint-Jean-de-Luz",43.388,-1.662],["fr","Ainhoa (Dancharia)",43.300,-1.500],["fr","Biarritz",43.483,-1.558],["fr","Bayonne",43.493,-1.475],["fr","Saint-Jean-Pied-de-Port",43.164,-1.237],["fr","Pau",43.295,-0.371],["fr","Lourdes",43.095,-0.046],["fr","Tarbes",43.233,0.073],["fr","Saint-Gaudens",43.108,0.724],["fr","Foix",42.965,1.607],["fr","Bourg-Madame",42.433,1.947],["fr","Perpignan",42.699,2.895],["fr","Le Boulou",42.525,2.833],["fr","Céret",42.487,2.749],["fr","Argelès-sur-Mer",42.546,3.022],["fr","Cerbère",42.442,3.168],["fr","Bordeaux",44.838,-0.579],["fr","Toulouse",43.604,1.444],["fr","Montpellier",43.611,3.877],["fr","Marseille",43.296,5.370],["fr","Lyon",45.764,4.836],["fr","Paris",48.857,2.352],
-["es","Irun",43.339,-1.789],["es","Hondarribia",43.368,-1.791],["es","Bera",43.283,-1.685],["es","Dantxarinea (Dancharia)",43.266,-1.533],["es","Elizondo",43.146,-1.520],["es","San Sebastián (Donostia)",43.318,-1.981],["es","Pamplona",42.812,-1.645],["es","Bilbao",43.263,-2.935],["es","Vitoria-Gasteiz",42.846,-2.673],["es","Logroño",42.466,-2.446],["es","Canfranc",42.703,-0.517],["es","Jaca",42.570,-0.549],["es","Huesca",42.140,-0.408],["es","Zaragoza",41.649,-0.889],["es","Vielha",42.703,0.795],["es","Lleida",41.617,0.620],["es","Puigcerdà",42.432,1.929],["es","La Jonquera",42.419,2.875],["es","Figueres",42.267,2.961],["es","Portbou",42.428,3.158],["es","Girona",41.983,2.824],["es","Barcelona",41.385,2.173],["es","Madrid",40.417,-3.704],["es","Valencia",39.470,-0.376]];
+["fr","Hendaye",43.359,-1.774],["fr","Saint-Jean-de-Luz",43.388,-1.662],["fr","Dancharia (Ainhoa)",43.300,-1.500,"dantcharia dancharinea"],["fr","Biarritz",43.483,-1.558],["fr","Bayonne",43.493,-1.475],["fr","Saint-Jean-Pied-de-Port",43.164,-1.237],["fr","Pau",43.295,-0.371],["fr","Lourdes",43.095,-0.046],["fr","Tarbes",43.233,0.073],["fr","Saint-Gaudens",43.108,0.724],["fr","Foix",42.965,1.607],["fr","Bourg-Madame",42.433,1.947],["fr","Perpignan",42.699,2.895],["fr","Le Boulou",42.525,2.833],["fr","Céret",42.487,2.749],["fr","Argelès-sur-Mer",42.546,3.022],["fr","Cerbère",42.442,3.168],["fr","Bordeaux",44.838,-0.579],["fr","Toulouse",43.604,1.444],["fr","Montpellier",43.611,3.877],["fr","Marseille",43.296,5.370],["fr","Lyon",45.764,4.836],["fr","Paris",48.857,2.352],
+["es","Irun",43.339,-1.789],["es","Hondarribia",43.368,-1.791],["es","Bera",43.283,-1.685],["es","Dantxarinea (Dancharia)",43.266,-1.533,"dantcharia dancharinea"],["es","Behobia (Béhobie)",43.356,-1.766,"behobie"],["es","Elizondo",43.146,-1.520],["es","San Sebastián (Donostia)",43.318,-1.981],["es","Pamplona",42.812,-1.645],["es","Bilbao",43.263,-2.935],["es","Vitoria-Gasteiz",42.846,-2.673],["es","Logroño",42.466,-2.446],["es","Canfranc",42.703,-0.517],["es","Jaca",42.570,-0.549],["es","Huesca",42.140,-0.408],["es","Zaragoza",41.649,-0.889],["es","Vielha",42.703,0.795],["es","Lleida",41.617,0.620],["es","Puigcerdà",42.432,1.929],["es","La Jonquera",42.419,2.875],["es","Figueres",42.267,2.961],["es","Portbou",42.428,3.158],["es","Girona",41.983,2.824],["es","Barcelona",41.385,2.173],["es","Madrid",40.417,-3.704],["es","Valencia",39.470,-0.376]];
 const norm=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const flag=c=>c=="fr"?"🇫🇷":"🇪🇸";
 (()=>{const g=c=>CITIES.map((x,i)=>x[0]==c?`<option value="${i}">${x[1]}</option>`:"").join("");
 $("vl").innerHTML=`<option value="">Choisir une ville dans la liste…</option><optgroup label="🇫🇷 France">${g("fr")}</optgroup><optgroup label="🇪🇸 Espagne">${g("es")}</optgroup>`})();
+const QUICK=["Irun","Behobia (Béhobie)","Dantxarinea (Dancharia)","Dancharia (Ainhoa)","Hendaye"];
+$("qk").innerHTML=QUICK.map(n=>{const i=CITIES.findIndex(c=>c[1]==n);return `<button class="alt" style="flex:none;padding:8px 12px;font-size:14px" data-i="${i}">${flag(CITIES[i][0])} ${n}</button>`}).join("");
+$("qk").onclick=e=>{const c=CITIES[e.target.dataset.i];if(c)pick({n:c[1],lat:c[2],lon:c[3],es:c[0]=="es"})};
 $("vl").onchange=e=>{const c=CITIES[e.target.value];if(c)pick({n:c[1],lat:c[2],lon:c[3],es:c[0]=="es"})};
 async function city(){
   const v=$("c").value.trim();if(!v)return;
@@ -137,7 +141,7 @@ async function city(){
   const [a,b]=await Promise.all([fr,es]);
   const on=[...a.map(c=>({t:`🇫🇷 ${c.nom} (${c.departement?.code||""})`,n:c.nom,lat:c.centre.coordinates[1],lon:c.centre.coordinates[0],es:false})),
     ...b.map(c=>{const n=c.name||c.display_name.split(",")[0];return {t:`🇪🇸 ${n} (${c.address?.province||c.address?.state||""})`,n,lat:+c.lat,lon:+c.lon,es:true}})];
-  const local=CITIES.filter(x=>norm(x[1]).includes(norm(v))).map(x=>({t:`${flag(x[0])} ${x[1]}`,n:x[1],lat:x[2],lon:x[3],es:x[0]=="es"}));
+  const local=CITIES.filter(x=>norm(x[1]+" "+(x[4]||"")).includes(norm(v))).map(x=>({t:`${flag(x[0])} ${x[1]}`,n:x[1],lat:x[2],lon:x[3],es:x[0]=="es"}));
   const k=c=>(c.es?"e":"f")+norm(c.n);const seen=new Set(local.map(k));
   const o=[...local,...on.filter(c=>!seen.has(k(c)))];
   if(!o.length){$("s").textContent="Ville introuvable.";return}
